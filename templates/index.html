@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Simple Video Downloader</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        input { width: 300px; padding: 10px; }
+        button { padding: 10px 20px; cursor: pointer; }
+        #result { margin-top: 20px; }
+        img { max-width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Video Downloader</h1>
+    <input type="text" id="url" placeholder="Paste YouTube Link Here">
+    <button onclick="fetchVideo()">Get Links</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function fetchVideo() {
+            const url = document.getElementById('url').value;
+            const resDiv = document.getElementById('result');
+            resDiv.innerHTML = "Processing...";
+
+            const formData = new FormData();
+            formData.append('url', url);
+
+            const response = await fetch('/get_info', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            if (data.error) {
+                resDiv.innerHTML = "Error: " + data.error;
+            } else {
+                let html = `<h3>${data.title}</h3><img src="${data.thumbnail}"><br>`;
+                data.formats.forEach(f => {
+                    if(f.format_note) {
+                        html += `<a href="${f.url}" target="_blank">Download ${f.format_note}</a><br>`;
+                    }
+                });
+                resDiv.innerHTML = html;
+            }
+        }
+    </script>
+</body>
+</html>

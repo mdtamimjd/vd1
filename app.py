@@ -15,11 +15,17 @@ def get_info():
     # Cookie file check kora jate error na hoy
     cookie_path = 'cookies.txt'
     
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
-        'format': 'best',
+   ydl_opts = {
+    'quiet': True,
+    'no_warnings': True,
+    'format': 'best',
+    'cookiefile': 'cookies.txt',  # Ei line-ti error solve korbe
+    'extractor_args': {
+        'youtube': {
+            'player_client': ['android', 'web']
+        }
     }
+}
     
     # Jodi cookies.txt file thake tobe seta use korbe
     if os.path.exists(cookie_path):
@@ -54,4 +60,5 @@ if __name__ == '__main__':
     # Render ba onno hosting-er jonno port dynamic kora
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
 

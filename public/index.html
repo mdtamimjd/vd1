@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeJS Video Downloader</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        input { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; }
+        button { background: #ff0000; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #result { margin-top: 25px; display: none; }
+        img { width: 100%; border-radius: 8px; }
+        .dl-link { display: block; background: #28a745; color: white; padding: 10px; margin: 10px 0; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>VidsSave Clone (Node.js)</h2>
+    <input type="text" id="url" placeholder="Paste YouTube Link Here">
+    <button onclick="getInfo()">Get Links</button>
+
+    <div id="result">
+        <h4 id="title"></h4>
+        <img id="thumb" src="" alt="Thumbnail">
+        <div id="links"></div>
+    </div>
+</div>
+
+<script>
+    async function getInfo() {
+        const url = document.getElementById('url').value;
+        const resDiv = document.getElementById('result');
+        const linksDiv = document.getElementById('links');
+
+        if(!url) return alert("Please enter a link");
+
+        resDiv.style.display = 'none';
+        linksDiv.innerHTML = "Loading...";
+
+        const response = await fetch('/get-info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            alert(data.error);
+        } else {
+            document.getElementById('title').innerText = data.title;
+            document.getElementById('thumb').src = data.thumbnail;
+            linksDiv.innerHTML = "";
+            
+            data.formats.forEach(f => {
+                linksDiv.innerHTML += `<a href="${f.url}" class="dl-link" target="_blank">Download MP4 (${f.quality})</a>`;
+            });
+            resDiv.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

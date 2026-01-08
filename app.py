@@ -11,18 +11,23 @@ def index():
 @app.route('/get_info', methods=['POST'])
 def get_info():
     video_url = request.form.get('url')
-    if not video_url:
-        return jsonify({'error': 'Please provide a URL'}), 400
     
-    # yt-dlp options for fast fetching
+    # Cookie file check kora jate error na hoy
+    cookie_path = 'cookies.txt'
+    
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'format': 'best',
     }
     
+    # Jodi cookies.txt file thake tobe seta use korbe
+    if os.path.exists(cookie_path):
+        ydl_opts['cookiefile'] = cookie_path
+
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            # ... baki code ager motoi thakbe ...
             info = ydl.extract_info(video_url, download=False)
             
             # Format list filter: Shudhu MP4 ebong video+audio ache emon formats
@@ -49,3 +54,4 @@ if __name__ == '__main__':
     # Render ba onno hosting-er jonno port dynamic kora
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+

@@ -1,46 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Simple Video Downloader</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidsSave Clone - Free Downloader</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; }
-        input { width: 300px; padding: 10px; }
-        button { padding: 10px 20px; cursor: pointer; }
-        #result { margin-top: 20px; }
-        img { max-width: 200px; }
+        :root { --primary: #ff0000; --dark: #1a1a1a; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); }
+        input { width: 80%; padding: 12px; border: 2px solid #ddd; border-radius: 25px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        button { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        #result { margin-top: 30px; display: none; }
+        .thumb { width: 100%; border-radius: 10px; margin-bottom: 15px; }
+        .dl-btn { display: block; background: #28a745; color: white; text-decoration: none; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .loading { display: none; color: #555; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h1>Video Downloader</h1>
-    <input type="text" id="url" placeholder="Paste YouTube Link Here">
-    <button onclick="fetchVideo()">Get Links</button>
 
-    <div id="result"></div>
+<div class="container">
+    <h1>VidsSave Clone</h1>
+    <p>Download YouTube Videos Easily</p>
+    
+    <input type="text" id="videoUrl" placeholder="Paste YouTube link here...">
+    <br>
+    <button onclick="downloadVideo()">Get Download Links</button>
+    
+    <div id="loading" class="loading">Processing... Please wait...</div>
 
-    <script>
-        async function fetchVideo() {
-            const url = document.getElementById('url').value;
-            const resDiv = document.getElementById('result');
-            resDiv.innerHTML = "Processing...";
+    <div id="result">
+        <h3 id="title"></h3>
+        <img id="thumbnail" class="thumb" src="" alt="thumbnail">
+        <div id="links"></div>
+    </div>
+</div>
 
+<script>
+    async function downloadVideo() {
+        const url = document.getElementById('videoUrl').value;
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const linksDiv = document.getElementById('links');
+
+        if(!url) return alert("Please paste a link!");
+
+        loading.style.display = "block";
+        result.style.display = "none";
+        linksDiv.innerHTML = "";
+
+        try {
             const formData = new FormData();
             formData.append('url', url);
 
             const response = await fetch('/get_info', { method: 'POST', body: formData });
             const data = await response.json();
 
-            if (data.error) {
-                resDiv.innerHTML = "Error: " + data.error;
+            if(data.error) {
+                alert("Error: " + data.error);
             } else {
-                let html = `<h3>${data.title}</h3><img src="${data.thumbnail}"><br>`;
+                document.getElementById('title').innerText = data.title;
+                document.getElementById('thumbnail').src = data.thumbnail;
+                
                 data.formats.forEach(f => {
-                    if(f.format_note) {
-                        html += `<a href="${f.url}" target="_blank">Download ${f.format_note}</a><br>`;
-                    }
+                    const a = document.createElement('a');
+                    a.href = f.url;
+                    a.className = 'dl-btn';
+                    a.target = '_blank';
+                    a.innerText = `Download MP4 (${f.quality})`;
+                    linksDiv.appendChild(a);
                 });
-                resDiv.innerHTML = html;
+                result.style.display = "block";
             }
+        } catch (e) {
+            alert("Something went wrong!");
+        } finally {
+            loading.style.display = "none";
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
